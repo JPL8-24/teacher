@@ -26,8 +26,8 @@
     </div>
     <div class="menu">
       <div class="menu-item">
-        <div class="icon"><img src="../../../static/img/help.png"> </div>
-        <div class="content">帮助反馈</div>
+        <div class="icon"><img src="../../../static/img/添加.png"> </div>
+        <div class="content">添加开放日</div>
         <div class="icon-right">></div>
       </div>
       <div class="menu-item">

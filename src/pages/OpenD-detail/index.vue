@@ -2,7 +2,7 @@
   <div class="Detail-container">
     <div class="OpenD-info">
       <div class="OpenD-img"><img src="../../../static/img/testimg.jpg" /></div>
-      <div class="OpenD-title">关于web前端某老师的OpenDay</div>
+      <div class="OpenD-title">{{title}}</div>
     </div>
     <div class="OpenD-member">
       <div class="member-title">
@@ -33,12 +33,13 @@
             <div class="id">{{item.id}}</div>
             <div class="time">{{item.startTime}}-{{item.endTime}}</div>
           </div>
-          <div class="add-item">
+          <div class="add-item" @click="RmdShow=true">
             <div class="addbox"></div>
           </div>
         </div>
       </div>
-    <add-student-m :SmdShow="SmdShow" :OpenId="OpenId" @close="closeModal"></add-student-m>
+    <add-student-m :SmdShow="SmdShow" :OpenId="OpenId" @close="ScloseModal"></add-student-m>
+    <add-record-m :RmdShow="RmdShow" :OpenId="OpenId" @close="RcloseModal" @reloadRecode="getRecordList"></add-record-m>
     </div>
   </div>
 </template>
@@ -46,6 +47,7 @@
 <script>
 import {mapState} from 'vuex'
 import AddStudentM from '../../components/AddStudentM'
+import AddRecordM from '../../components/AddRecordM'
   export default {
     name: "",
     data() {
@@ -54,22 +56,27 @@ import AddStudentM from '../../components/AddStudentM'
         memberList: [],
         recordList: [],
         count:'',
-        SmdShow:false
+        SmdShow:false,
+        RmdShow:false,
+        title:''
       };
     },
     components: {
-      AddStudentM
+      AddStudentM,
+      AddRecordM
     },
     mounted() {
       this.OpenId = this.$root.$mp.query.id
+      console.log(this.userOpenD)
       this.userOpenD.forEach((item)=>{
         if(item.id==this.OpenId){
           this.memberList=item.member
           this.count=item.member.length
+          this.title=item.title
+
         }
       })
       this.getRecordList()
-      console.log(this.count)
     },
     methods: {
       getRecordList() {
@@ -91,8 +98,11 @@ import AddStudentM from '../../components/AddStudentM'
         let s = date.getSeconds();
         return Y + M + D + h + m + s;
       },
-      closeModal(){
+      ScloseModal(){
         this.SmdShow=false
+      },
+      RcloseModal(){
+        this.RmdShow=false
       }
     },
     computed: {

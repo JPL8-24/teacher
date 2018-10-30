@@ -2,29 +2,27 @@
   <div v-if="SmdShow">
     <div class="add-student">
       <div class="title">请输入要添加的学生ID</div>
-      <input class="input" placeholder="学生ID" v-model="studentId">
+      <input class="input" placeholder="学生ID" v-model.lazy="studentId">
       <div class="btnGroup">
         <div class="confirm" @click="addStudent">确认</div>
         <div class="cancle" @click="closeModal">取消</div>
       </div>
     </div>
-    <div class="mask"></div>
+    <div class="mask" @click="closeModal"></div>
   </div>
 </template>
 
 <script>
   export default {
-    name: '',
     data() {
       return {
         studentId: ''
       }
     },
-    components: {},
     methods: {
       addStudent() {
         this.$fly.post(`http://47.107.116.71/open_days/${this.OpenId}/students`, {
-          'students': [this.studentId]
+          students: [this.studentId]
         }, {
           headers: {
             "Content-type": "application/json"

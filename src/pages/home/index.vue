@@ -16,6 +16,7 @@
   import IconList from '../../components/IconList'
   import TeacherChoose from '../../components/teacherChoose'
   import TeacherList from '../../components/teacherList'
+  import AddRecordM from '../../components/AddRecordM.vue'
   export default {
     name: "index",
     data(){
@@ -29,12 +30,6 @@
       IconList,
       TeacherChoose,
       TeacherList
-    },
-    methods: {
-      
-    },
-    mounted () {
-      
     }
   };
 </script>

@@ -13,15 +13,18 @@
         <button @click="go">点击进入</button>
       </div>
     </div>
+    <add-open-m :OmdShow="OmdShow"  @close="OcloseModal"></add-open-m>
   </div>
 
 </template>
 <script>
+import AddOpenM from '../../components/AddOpenM'
   export default {
     data() {
       return {
         userInfo: {},
-        caniuse: true
+        caniuse: true,
+        OmdShow:false
       }
     },
 
@@ -50,6 +53,9 @@
       change() {
         this.caniuse = false
         this.getUserInfo()
+      },
+      OcloseModal(){
+        this.OmdShow=false
       }
     },
 
@@ -60,7 +66,9 @@
         this.caniuse = false;
         this.getUserInfo()
       }
-
+    },
+    components:{
+      AddOpenM
     }
   }
 

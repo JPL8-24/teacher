@@ -107,7 +107,8 @@ import AddRecordM from '../../components/AddRecordM'
     },
     computed: {
       ...mapState({
-        userOpenD:state=>state.userOpenD
+        userOpenD:state=>state.userOpenD,
+        userInfo: state => state.userInfo
       })
     }
 

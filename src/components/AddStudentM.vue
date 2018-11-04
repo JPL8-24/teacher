@@ -21,20 +21,15 @@
     },
     methods: {
       addStudent() {
-        this.$fly.post(`http://47.107.116.71/open_days/${this.OpenId}/students`, {
-          students: [this.studentId]
-        }, {
-          headers: {
-            "Content-type": "application/json"
-          }
-        }).then((res) => {
+        this.$fly.post(`http://47.107.116.71/open_days/${this.OpenId}/students`,[`${this.studentId}`]).then((res) => {
           console.log(res)
           this.closeModal()
         })
       },
       closeModal() {
         this.$emit('close')
-      }
+      },
+
     },
     props: ['SmdShow', 'OpenId']
   }

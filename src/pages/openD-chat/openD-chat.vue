@@ -31,29 +31,59 @@
     <div class="openD-info" @click="go('/OpenD-detail',OpenId)">
       <img src="../../../static/img/群聊.png">
     </div>
+    <div class="openD-live" @click="startLive">
+      <img src="../../../static/img/摄像头.png">
+    </div>
+    <live-pusher class="live" id="live" :url="url" mode="RTC" autopush v-if="living&&userInfo.type==0" />
+
+    <live-player id="player" class="live" :src="url" mode="RTC" autoplay v-if="living&&userInfo.type==2" />
+
   </div>
 </template>
 
 <script>
+  import {
+    mapState
+  } from 'vuex'
   export default {
     data() {
       return {
-        OpenId: ''
+        OpenId: '',
+        liveContext: '',
+        living: false
       };
     },
     mounted() {
-      wx.setNavigationBarTitle({
-        title: "关于web前端某老师的OpenDay"
-      });
       this.OpenId = this.$root.$mp.query.id
-      console.log(this.OpenId)
+      // this.liveContext = wx.createLivePusherContext()
+      console.log(this.userInfo)
     },
     methods: {
-      go(src,id) {
+      go(src, id) {
         wx.navigateTo({
           url: `/pages${src}/main?id=${id}`
         })
+      },
+      startLive() {
+        if(this.living){
+          this.living = false
+        } else{
+          this.living=true
+        }
+        console.log("111")
       }
+    },
+    computed: {
+      ...mapState({
+        userInfo: state => state.userInfo
+      }),
+      url() {
+        return `rtmp://47.107.116.71:1935/live/${this.OpenId}`
+      }
+    },
+    onHide() {
+      this.living = false
+      console.log("1")
     }
   };
 
@@ -64,6 +94,7 @@
     display: flex;
     flex-direction: column;
     overflow: scroll;
+    position: relative;
   }
 
   .msgA {
@@ -177,12 +208,35 @@
     height: 70rpx;
     width: 70rpx;
     border-radius: 50%;
-
   }
 
   .openD-info>img {
     width: 100%;
     height: 100%;
   }
+
+  .openD-live {
+    position: fixed;
+    bottom: 80rpx;
+    right: 100rpx;
+    background-color: white;
+    height: 70rpx;
+    width: 70rpx;
+    border-radius: 50%;
+  }
+
+  .openD-live>img {
+    width: 100%;
+    height: 100%;
+  }
+
+
+  .live {
+    position: relative;
+    width: 100%;
+    height: 800rpx;
+    top:-212rpx;
+  }
+
 
 </style>

@@ -25,7 +25,7 @@ export default {
   // 这个字段走 app.json
   config: {
     // 页面前带有 ^ 符号的，会被编译成首页，其他页面可以选填，我们会自动把 webpack entry 里面的入口页面加进去
-    pages: ['pages/Login/main','pages/info/main','^pages/home/main','pages/News/main','pages/aboutUs/main','pages/feedback/main',
+    pages: ['^pages/Login/main','pages/info/main','pages/home/main','pages/News/main','pages/aboutUs/main','pages/feedback/main',
     'pages/NewsDetail/main','pages/openD-chat/main','pages/AllOpenD/main','pages/OpenD-detail/main'],
     window: {
       backgroundTextStyle: 'light',

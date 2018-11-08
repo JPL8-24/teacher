@@ -3,8 +3,8 @@
     <div class="background"></div>
     <div class="user-info">
       <div class="userinfo">
-        <img class="userinfo-avatar" v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" background-size="cover" />
-        <p>{{userInfo.nickName}}</p>
+        <img class="userinfo-avatar" :src="userInfo.portrait" background-size="cover" />
+        <p>{{userInfo.username}}</p>
       </div>
     </div>
     <div class="menu">
@@ -30,9 +30,9 @@
         <div class="content">添加开放日</div>
         <div class="icon-right">></div>
       </div>
-      <div class="menu-item">
+      <div class="menu-item" @click="logOut">
         <div class="icon"><img src="../../../static/img/help.png"> </div>
-        <div class="content">帮助反馈</div>
+        <div class="content">退出登录</div>
         <div class="icon-right">></div>
       </div>
       <div class="menu-item" @click="clearRubish">
@@ -48,17 +48,16 @@
 
 <script>
   import AddOpenM from '../../components/AddOpenM'
+  import {
+    mapState
+  } from 'vuex'
   export default {
     data() {
       return {
-        userInfo: {},
         OmdShow: false
       }
     },
     methods: {
-      getuser() {
-        this.userInfo = Object.assign({}, wx.getStorageSync('useinfo'))
-      },
       goTo(src) {
         wx.navigateTo({
           url: `/pages${src}/main`
@@ -90,14 +89,21 @@
       },
       OcloseModal() {
         this.OmdShow = false
+      },
+      logOut() {
+        wx.redirectTo({
+          url: '/pages/Login/main'
+        })
       }
 
     },
-    mounted() {
-      this.getuser()
-    },
     components: {
       AddOpenM
+    },
+    computed: {
+      ...mapState({
+        userInfo: state => state.userInfo
+      })
     }
   };
 

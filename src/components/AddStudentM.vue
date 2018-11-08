@@ -13,6 +13,9 @@
 </template>
 
 <script>
+  import {
+    mapState
+  } from 'vuex'
   export default {
     data() {
       return {
@@ -21,17 +24,40 @@
     },
     methods: {
       addStudent() {
-        this.$fly.post(`http://47.107.116.71/open_days/${this.OpenId}/students`,[`${this.studentId}`]).then((res) => {
+        if (this.userInfo.type == 2) {
+          wx.showToast({
+            title: '只有老师才能添加学生哦',
+            duration: 1500,
+            icon: 'none',
+            complete: () => {
+              return
+            }
+          })
+          return
+        }
+        this.$fly.post(`http://47.107.116.71/open_days/${this.OpenId}/students`, [`${this.studentId}`]).then((res) => {
           console.log(res)
-          this.closeModal()
+          wx.showToast({
+            title: '添加成功',
+            icon: 'success',
+            duration: 1500,
+            complete: () => {
+              this.closeModal()
+              this.$emit("reloadMember")
+            }
+          })
         })
       },
       closeModal() {
         this.$emit('close')
-      },
-
+      }
     },
-    props: ['SmdShow', 'OpenId']
+    props: ['SmdShow', 'OpenId'],
+    computed: {
+      ...mapState({
+        userInfo: state => state.userInfo
+      })
+    }
   }
 
 </script>

@@ -5,7 +5,7 @@
         <div class="portrait" @click="chooseImg"><img :src="portrait"></div>
         <input class="title-input" placeholder="开放日标题" v-model.lazy="title">
       </div>
-      <textarea id="des-input" placeholder="请输入开放日的描述" v-model.lazy="des" adjust-position=true></textarea>
+      <textarea id="des-input" placeholder="请输入开放日的描述" v-model="des" adjust-position=true></textarea>
       <div class="btnGroup">
         <div class="confirm" @click="addOpenD">确认</div>
         <div class="cancle" @click="closeMoal">取消</div>
@@ -16,13 +16,20 @@
 </template>
 
 <script>
+  import {
+    mapState
+  } from 'vuex'
+  import {
+    mapMutations
+  } from 'vuex'
   export default {
     data() {
       return {
         portrait: "../../static/img/头像.png",
         title: "",
         des: "",
-        fileKey: ''
+        fileKey: '',
+        teacherId: ''
       };
     },
     components: {},
@@ -56,10 +63,74 @@
         this.$emit('close')
       },
       addOpenD() {
-          this.$fly.post('')
+        if (this.userInfo.type == 2) {
+          wx.showToast({
+            title: '只有老师才能添加开放日哦',
+            duration: 1500,
+            icon: 'none',
+            complete: () => {
+              return
+            }
+          })
+          return
+        }
+        this.$fly.post('http://47.107.116.71/open_days', {
+          "description": this.des,
+          "picKey": this.fileKey,
+          "teacher": this.teacherId,
+          "title": this.title,
+        }).then((res) => {
+          console.log(res)
+          this.getUserOpenD()
+          this.closeMoal()
+        })
+      },
+      ...mapMutations([
+        'saveUserOpenD'
+      ]),
+      getUserOpenD() {
+        this.$fly.get('http://47.107.116.71:80/open_days').then((res) => {
+          this.openD = res.data.data
+          this.openD.forEach(async element => {
+            await this.$fly.get(`http://47.107.116.71:80/user/info/${element.teacher}`).then((res) => {
+              this.$set(element, "teacherName", res.data.data.username)
+            })
+            await this.$fly.get(`http://47.107.116.71:80/open_days/record/${element.id}`).then((res) => {
+              if (res.data.data.length > 0) {
+                this.$set(element, "startTime", this.timeFormat(res.data.data[0].startTime))
+                this.$set(element, "endTime", this.timeFormat(res.data.data[0].endTime))
+              } else {
+                this.$set(element, "noRecord", true)
+              }
+            })
+            await this.$fly.get(`http://47.107.116.71/open_days/user/${element.id}`).then((res) => {
+              this.$set(element, 'member', res.data.data)
+              this.$set(element, 'count', res.data.data.length)
+            })
+          })
+          this.saveUserOpenD(this.openD)
+        })
+      },
+      timeFormat(value) {
+        let date = new Date(value); //时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        let Y = date.getFullYear() + '-';
+        let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+        let D = date.getDate() + ' ';
+        let h = date.getHours() + ':';
+        let m = date.getMinutes() + ':';
+        let s = date.getSeconds();
+        return Y + M + D + h + m + s;
       }
     },
-    props: ['OmdShow']
+    props: ['OmdShow'],
+    mounted() {
+      this.teacherId = this.userInfo.userId
+    },
+    computed: {
+      ...mapState({
+        userInfo: state => state.userInfo
+      })
+    }
   };
 
 </script>

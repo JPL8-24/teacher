@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="teacher-list" v-for="item in openD" :key='item.id' @click="go('/openD-chat',item.id)">
+    <div class="teacher-list" v-for="item in userOpenD" :key='item.id' @click="go('/openD-chat',item.id)">
       <div class="background"></div>
-      <div class="openD-img"><img src="../../static/img/testimg.jpg"></div>
+      <div class="openD-img"><img :src="item.portrait"></div>
       <div class="openD-info">
         <div class="openD-title">
           <p>{{item.title}}</p>
@@ -43,6 +43,9 @@
   import {
     mapMutations
   } from 'vuex'
+    import {
+    mapState
+  } from 'vuex'
   export default {
     name: "teacherList",
     data() {
@@ -75,6 +78,9 @@
               this.$set(element, 'member', res.data.data)
               this.$set(element, 'count', res.data.data.length)
             })
+            await this.$fly.get(`http://47.107.116.71/files/download/${element.picKey}`).then((res)=>{
+              this.$set(element,'portrait',res.data.data)
+            })
           })
           this.saveUserOpenD(this.openD)
         })
@@ -95,6 +101,11 @@
     },
     mounted() {
       this.getUserOpenD()
+    },
+    computed: {
+      ...mapState({
+        userOpenD:state=>state.userOpenD
+      })
     }
   };
 

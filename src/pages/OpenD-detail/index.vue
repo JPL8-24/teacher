@@ -1,7 +1,7 @@
 <template>
   <div class="Detail-container">
     <div class="OpenD-info">
-      <div class="OpenD-img"><img src="../../../static/img/testimg.jpg" /></div>
+      <div class="OpenD-img"><img :src="portrait" /></div>
       <div class="OpenD-title">{{title}}</div>
     </div>
     <div class="OpenD-member">
@@ -14,7 +14,7 @@
       </div>
       <div class="member-list">
         <div class="member-item" v-for="item in memberList" :key="item.userId">
-          <div class="member-portrait"><img src="../../../static/img/testimg.jpg"></div>
+          <div class="member-portrait"><img :src="item.portrait"></div>
           <div class="member-userName">{{item.username}}</div>
         </div>
         <div class="member-item" @click="SmdShow=true">
@@ -38,7 +38,7 @@
           </div>
         </div>
       </div>
-    <add-student-m :SmdShow="SmdShow" :OpenId="OpenId" @close="ScloseModal"></add-student-m>
+    <add-student-m :SmdShow="SmdShow" :OpenId="OpenId" @close="ScloseModal" @reloadMember="reloadMember"></add-student-m>
     <add-record-m :RmdShow="RmdShow" :OpenId="OpenId" @close="RcloseModal" @reloadRecode="getRecordList"></add-record-m>
     </div>
   </div>
@@ -58,7 +58,8 @@ import AddRecordM from '../../components/AddRecordM'
         count:'',
         SmdShow:false,
         RmdShow:false,
-        title:''
+        title:'',
+        portrait:''
       };
     },
     components: {
@@ -71,9 +72,18 @@ import AddRecordM from '../../components/AddRecordM'
       this.userOpenD.forEach((item)=>{
         if(item.id==this.OpenId){
           this.memberList=item.member
+          this.memberList.forEach((element)=>{
+            if(!element.picKey){
+              this.$set(element,'portrait',"../../../static/img/testimg.jpg")
+            }else{
+              this.$fly.get(`http://47.107.116.71/files/download/${element.picKey}`).then((res)=>{
+              this.$set(element,'portrait',res.data.data)
+            })
+            }
+          })
           this.count=item.member.length
           this.title=item.title
-
+          this.portrait=item.portrait
         }
       })
       this.getRecordList()
@@ -103,6 +113,11 @@ import AddRecordM from '../../components/AddRecordM'
       },
       RcloseModal(){
         this.RmdShow=false
+      },
+      reloadMember(){
+        this.$fly.get(`http://47.107.116.71/open_days/user/${this.OpenId}`).then((res)=>{
+          this.memberList=res.data.data
+        })
       }
     },
     computed: {

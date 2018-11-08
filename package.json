@@ -10,12 +10,17 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "ajv-keywords": "^3.2.0",
     "axios": "^0.18.0",
     "flyio": "^0.5.9",
     "mp-weui": "^1.0.4",
     "mpvue": "^1.0.11",
+    "net": "^1.0.2",
+    "sockjs-client": "^1.3.0",
+    "stompjs": "^2.3.3",
     "vconsole": "^3.2.0",
     "vue-canvas-effect": "0.0.12",
+    "vue-loader": "^13.7.2",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
   },

@@ -21,6 +21,9 @@
 </template>
 
 <script>
+  import {
+    mapState
+  } from 'vuex'
   export default {
     data() {
       return {
@@ -45,6 +48,17 @@
         this.endTime = e.target.value
       },
       addRecord() {
+        if (this.userInfo.type == 2) {
+          wx.showToast({
+            title: '只有老师才能添加记录哦',
+            duration: 1500,
+            icon: 'none',
+            complete:()=>{
+              return 
+            }
+          })
+          return
+        }
         if (this.startTime >= this.endTime) {
           wx.showToast({
             title: '起始时间不能大于结束时间',
@@ -67,10 +81,14 @@
             }
           })
         }
-
+        
       }
     },
-    mounted() {}
+    computed: {
+      ...mapState({
+        userInfo: state => state.userInfo
+      })
+    }
   };
 
 </script>

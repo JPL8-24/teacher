@@ -27,10 +27,16 @@ export default new Vuex.Store({
     },
     saveUserInfo(state,payload){
      state.userInfo= Object.assign(state.userInfo,payload)
-      console.log(state.userInfo)
     },
     saveUserOpenD(state,payload){
-      state.userOpenD=Object.assign(state.userOpenD,payload)
+      state.userOpenD=payload.slice()
+      console.log(state.userOpenD)
+    },
+    addUserId(state,payload){
+      Object.assign(state.userInfo,{
+        userId:payload.userId
+      })
+      console.log(state.userInfo)
     }
   }
 })

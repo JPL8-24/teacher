@@ -8,7 +8,9 @@ export default new Vuex.Store({
     channel:'top',
     userInfo:{},
     userOpenD:[],
-    AllOpenD:[]
+    AllOpenD:[],
+    recordId:'',
+    globalSoket:''
   },
   actions:{
 
@@ -37,6 +39,14 @@ export default new Vuex.Store({
         userId:payload.userId
       })
       console.log(state.userInfo)
+    },
+    changeRecord(state,id){
+      state.recordId=id
+      console.log(state.recordId)
+    },
+    saveglobalSoket(state,globalSoket){
+      state.globalSoket=globalSoket
+      console.log(state.globalSoket)
     }
   }
 })

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="teacher-list" v-for="item in userOpenD" :key='item.id' @click="go('/openD-chat',item.id)">
+    <div class="teacher-list" v-for="item in userOpenD" :key='item.id' @click="go('/OpenD-detail',item.id)">
       <div class="background"></div>
       <div class="openD-img"><img :src="item.portrait"></div>
       <div class="openD-info">
@@ -68,8 +68,10 @@
             })
             await this.$fly.get(`http://47.107.116.71:80/open_days/record/${element.id}`).then((res) => {
               if (res.data.data.length > 0) {
-                this.$set(element, "startTime", this.timeFormat(res.data.data[0].startTime))
-                this.$set(element, "endTime", this.timeFormat(res.data.data[0].endTime))
+                console.log(res.data.data.length)
+                let len=res.data.data.length-1
+                this.$set(element, "startTime", this.timeFormat(res.data.data[len].startTime))
+                this.$set(element, "endTime", this.timeFormat(res.data.data[len].endTime))
               } else {
                 this.$set(element, "noRecord", true)
               }

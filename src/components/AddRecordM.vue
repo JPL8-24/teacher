@@ -53,8 +53,8 @@
             title: '只有老师才能添加记录哦',
             duration: 1500,
             icon: 'none',
-            complete:()=>{
-              return 
+            complete: () => {
+              return
             }
           })
           return
@@ -66,10 +66,12 @@
             icon: 'none'
           })
         } else {
-          let startDate = `${this.Date} ${this.startTime}:0`
-          let endDate = `${this.Date} ${this.endTime}:0`
+          let startDate = `${this.Date} ${this.startTime}:0`.replace(/-/g, '/')
+          let endDate = `${this.Date} ${this.endTime}:0`.replace(/-/g, '/')
+          console.log(this.Date, this.endTime)
           let startTime = new Date(startDate).getTime()
           let endTime = new Date(endDate).getTime()
+          console.log(startTime, endTime)
           this.$fly.post(`http://47.107.116.71/open_days/${this.OpenId}/record/`, {
             "endTime": endTime,
             "id": this.OpenId,
@@ -81,7 +83,6 @@
             }
           })
         }
-        
       }
     },
     computed: {

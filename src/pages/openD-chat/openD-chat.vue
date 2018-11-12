@@ -31,14 +31,16 @@
         <div class="msgA-content">
           <div class="left-triangle"></div>
           <div class="msgA-msg">
-            <div v-if="!item.uplpadImg">{{item.content}}</div><img :src="item.uplpadImg" v-if="item.uplpadImg" @click="preView(item.uplpadImg)">
+            <div v-if="!item.uplpadImg">{{item.content}}</div>
+            <img :src="item.uplpadImg" v-if="item.uplpadImg" @click="preView(item.uplpadImg)">
           </div>
         </div>
       </div>
       <div class="msgB" v-else>
         <div class="msgB-content">
           <div class="msgB-msg">
-            <div v-if="!item.uplpadImg">{{item.content}}</div><img :src="item.uplpadImg" v-if="item.uplpadImg" @click="preView(item.uplpadImg)">
+            <div v-if="!item.uplpadImg">{{item.content}}</div>
+            <img :src="item.uplpadImg" v-if="item.uplpadImg" @click="preView(item.uplpadImg)">
           </div>
           <div class="right-triangle"></div>
         </div>
@@ -72,10 +74,13 @@
   import Stomp from "stompjs";
   import {
     WebSocket
-  } from '../../utils/WEB.js'
+  } from "../../utils/WEB.js";
   import {
     mapState
   } from "vuex";
+  import {
+    mapMutations
+  } from 'vuex'
   export default {
     data() {
       return {
@@ -83,16 +88,28 @@
         liveContext: "",
         living: false,
         chatList: [],
-        socket: '',
-        msg: '',
-        token: ''
+        socket: "",
+        msg: "",
+        token: ""
       };
     },
     mounted() {
-      let that = this
+      let that = this;
       this.OpenId = this.$root.$mp.query.id;
-      this.getChatList();
-      this.initSocket()
+      if (this.recordId != this.OpenId && this.recordId != '') {
+        this.changeRecord(this.OpenId)
+        this.globalSoket.close()
+        this.getChatList();
+        this.initSocket();
+      } else if (this.recordId == '') {
+        this.changeRecord(this.OpenId)
+        this.getChatList();
+        return this.initSocket()
+      } else if (this.recordId == this.OpenId) {
+        this.getChatList();
+        this.globalSoket.close
+        return this.initSocket();
+      }
     },
     methods: {
       go(src, id) {
@@ -114,60 +131,91 @@
             this.chatList = res.data.data;
             this.chatList.forEach(element => {
               if (element.senderId) {
-                this.$fly.get(`http://47.107.116.71:80/user/info/${element.senderId}`).then((res2) => {
-                  let picKey = res2.data.data.picKey
-                  this.$fly.get(`http://47.107.116.71/files/download/${picKey}`).then((res) => {
-                    this.$set(element, 'portrait', res.data.data)
-                  })
-                })
+                this.$fly
+                  .get(`http://47.107.116.71:80/user/info/${element.senderId}`)
+                  .then(res2 => {
+                    let picKey = res2.data.data.picKey;
+                    this.$fly
+                      .get(`http://47.107.116.71/files/download/${picKey}`)
+                      .then(res => {
+                        this.$set(element, "portrait", res.data.data);
+                      });
+                  });
               }
               if (element.type == 2) {
-                this.$fly.get(`http://47.107.116.71/files/download/${element.content}`).then((res) => {
-                  this.$set(element, 'uplpadImg', res.data.data)
-                })
+                this.$fly
+                  .get(`http://47.107.116.71/files/download/${element.content}`)
+                  .then(res => {
+                    this.$set(element, "uplpadImg", res.data.data);
+                  });
               }
             });
-          })
+          });
       },
       initSocket() {
-        let token = wx.getStorageSync('token')
-        let _this = this
-        this.token = token
-        this.socket = new WebSocket()
-        this.socket.buildConnect('ws://47.107.116.71/chat', `/message/group/${this.OpenId}`, function (res) {
-          console.log(res)
-          let newMsg = JSON.parse(res.body)
-          if (newMsg.type == 0) {
-            _this.$fly.get(`http://47.107.116.71:80/user/info/${newMsg.senderId}`).then((res) => {
-              let picKey = res.data.data.picKey
-              _this.$fly.get(`http://47.107.116.71/files/download/${picKey}`).then((res2) => {
-                _this.$set(newMsg, 'portrait', res2.data.data)
-                _this.chatList.push(newMsg)
-              })
-            })
-          } else if (newMsg.type == 2) {
-            console.log(newMsg)
-            _this.$fly.get(`http://47.107.116.71:80/user/info/${newMsg.senderId}`).then((res) => {
-              let picKey = res.data.data.picKey
-              _this.$fly.get(`http://47.107.116.71/files/download/${picKey}`).then((res2) => {
-                _this.$set(newMsg, 'portrait', res2.data.data)
-                _this.$fly.get(`http://47.107.116.71/files/download/${newMsg.content}`).then((res3) => {
-                  _this.$set(newMsg, 'uplpadImg', res3.data.data)
-                  _this.chatList.push(newMsg)
-                })
-              })
-            })
+        let token = wx.getStorageSync("token");
+        let _this = this;
+        this.token = token;
+        this.socket = new WebSocket();
+        this.saveglobalSoket(this.socket)
+        this.socket.buildConnect(
+          "ws://47.107.116.71/chat",
+          `/message/group/${this.OpenId}`,
+          function (res) {
+            let newMsg = JSON.parse(res.body);
+            if (newMsg.type === 0) {
+              console.log(newMsg)
+              _this.$fly
+                .get(`http://47.107.116.71:80/user/info/${newMsg.senderId}`)
+                .then(res => {
+                  let picKey = res.data.data.picKey;
+                  _this.$fly
+                    .get(`http://47.107.116.71/files/download/${picKey}`)
+                    .then(res2 => {
+                      _this.$set(newMsg, "portrait", res2.data.data);
+                      _this.chatList.push(newMsg);
+                      console.log(_this.chatList)
+                    });
+                });
+            } else if (newMsg.type === 2) {
+              console.log(newMsg);
+              _this.$fly
+                .get(`http://47.107.116.71:80/user/info/${newMsg.senderId}`)
+                .then(res => {
+                  let picKey = res.data.data.picKey;
+                  _this.$fly
+                    .get(`http://47.107.116.71/files/download/${picKey}`)
+                    .then(res2 => {
+                      _this.$set(newMsg, "portrait", res2.data.data);
+                      _this.$fly
+                        .get(
+                          `http://47.107.116.71/files/download/${newMsg.content}`
+                        )
+                        .then(res3 => {
+                          _this.$set(newMsg, "uplpadImg", res3.data.data);
+                          _this.chatList.push(newMsg);
+                          console.log(_this.chatList)
+                        });
+                    });
+                });
+            }
           }
-        })
+        );
+
       },
       sendMsg() {
-        this.socket.sendMessage(`/app/group/${this.OpenId}`, {
-          "token": this.token
-        }, {
-          content: this.msg,
-          type: 0
-        })
-        this.msg = ''
+        if (!this.msg) {
+          return
+        }
+        this.socket.sendMessage(
+          `/app/group/${this.OpenId}`, {
+            token: this.token
+          }, {
+            content: this.msg,
+            type: 0
+          }
+        );
+        this.msg =" ";
       },
       file() {
         wx.chooseImage({
@@ -175,40 +223,50 @@
           sizeType: ["original", "compressed"],
           sourceType: ["album", "camera"],
           success: res => {
-            let uploadImg = res.tempFilePaths[0]
-            console.log(uploadImg)
-            this.$fly.get(`http://47.107.116.71/files/upload/${uploadImg.slice(11)}`).then((res) => {
-              console.log(res)
-              let fileKey = res.data.data.key
-              wx.uploadFile({
-                url: res.data.data.url,
-                filePath: uploadImg,
-                name: "file",
-                formData: {
-                  'key': res.data.data.key
-                },
-                complete: (res) => {
-                  this.socket.sendMessage(`/app/group/${this.OpenId}`, {
-                    "token": this.token
-                  }, {
-                    content: fileKey,
-                    type: 2,
-                  })
-                }
-              })
-            })
+            let uploadImg = res.tempFilePaths[0];
+            console.log(uploadImg);
+            this.$fly
+              .get(`http://47.107.116.71/files/upload/${uploadImg.slice(11)}`)
+              .then(res => {
+                console.log(res);
+                let fileKey = res.data.data.key;
+                wx.uploadFile({
+                  url: res.data.data.url,
+                  filePath: uploadImg,
+                  name: "file",
+                  formData: {
+                    key: res.data.data.key
+                  },
+                  complete: res => {
+                    this.socket.sendMessage(
+                      `/app/group/${this.OpenId}`, {
+                        token: this.token
+                      }, {
+                        content: fileKey,
+                        type: 2
+                      }
+                    );
+                  }
+                });
+              });
           }
-        })
+        });
       },
       preView(url) {
         wx.previewImage({
           urls: [url]
-        })
-      }
+        });
+      },
+      ...mapMutations([
+        'changeRecord',
+        'saveglobalSoket'
+      ])
     },
     computed: {
       ...mapState({
-        userInfo: state => state.userInfo
+        userInfo: state => state.userInfo,
+        recordId: state => state.recordId,
+        globalSoket: state => state.globalSoket
       }),
       url() {
         return `rtmp://47.107.116.71:1935/live/${this.OpenId}`;

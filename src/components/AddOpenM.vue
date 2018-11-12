@@ -107,6 +107,9 @@
               this.$set(element, 'member', res.data.data)
               this.$set(element, 'count', res.data.data.length)
             })
+            await this.$fly.get(`http://47.107.116.71/files/download/${element.picKey}`).then((res)=>{
+              this.$set(element,'portrait',res.data.data)
+            })
           })
           this.saveUserOpenD(this.openD)
         })

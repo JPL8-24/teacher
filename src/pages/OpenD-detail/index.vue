@@ -15,10 +15,13 @@
       <div class="member-list">
         <div class="member-item" v-for="item in memberList" :key="item.userId">
           <div class="member-portrait"><img :src="item.portrait"></div>
-          <div class="member-userName">{{item.username}}</div>
+          <div class="member-userName">
+            <div v-if="item.username" class="aa">{{item.username}}</div>
+            <div v-else>{{item.userId}}</div>
+          </div>
         </div>
         <div class="member-item" @click="SmdShow=true">
-          <div class="addbox member-portrait"></div>
+          <div class="member-portrait"><img src="../../../static/img/添加.png"></div>
           <div class="member-userName">添加学员</div>
         </div>
       </div>
@@ -29,25 +32,28 @@
           <span>开放日记录</span>
         </div>
         <div class="records-list">
-          <div class="record-item" v-for="item in recordList" :key="item.id">
+          <div class="record-item" v-for="item in recordList" :key="item.id" @click="go('/openD-chat',item.id)">
             <div class="id">{{item.id}}</div>
             <div class="time">{{item.startTime}}-{{item.endTime}}</div>
+            <div class="ispass" v-if="item.isPass"><img src="../../../static/img/禁止.png"></div>
           </div>
           <div class="add-item" @click="RmdShow=true">
-            <div class="addbox"></div>
+            <div class="addbox"><img src="../../../static/img/添加.png"></div>
           </div>
         </div>
       </div>
-    <add-student-m :SmdShow="SmdShow" :OpenId="OpenId" @close="ScloseModal" @reloadMember="reloadMember"></add-student-m>
-    <add-record-m :RmdShow="RmdShow" :OpenId="OpenId" @close="RcloseModal" @reloadRecode="getRecordList"></add-record-m>
+      <add-student-m :SmdShow="SmdShow" :OpenId="OpenId" @close="ScloseModal" @reloadMember="reloadMember"></add-student-m>
+      <add-record-m :RmdShow="RmdShow" :OpenId="OpenId" @close="RcloseModal" @reloadRecode="getRecordList"></add-record-m>
     </div>
   </div>
 </template>
 
 <script>
-import {mapState} from 'vuex'
-import AddStudentM from '../../components/AddStudentM'
-import AddRecordM from '../../components/AddRecordM'
+  import {
+    mapState
+  } from 'vuex'
+  import AddStudentM from '../../components/AddStudentM'
+  import AddRecordM from '../../components/AddRecordM'
   export default {
     name: "",
     data() {
@@ -55,11 +61,11 @@ import AddRecordM from '../../components/AddRecordM'
         OpenId: '',
         memberList: [],
         recordList: [],
-        count:'',
-        SmdShow:false,
-        RmdShow:false,
-        title:'',
-        portrait:''
+        count: '',
+        SmdShow: false,
+        RmdShow: false,
+        title: '',
+        portrait: ''
       };
     },
     components: {
@@ -68,22 +74,23 @@ import AddRecordM from '../../components/AddRecordM'
     },
     mounted() {
       this.OpenId = this.$root.$mp.query.id
+      console.log(this.OpenId)
       console.log(this.userOpenD)
-      this.userOpenD.forEach((item)=>{
-        if(item.id==this.OpenId){
-          this.memberList=item.member
-          this.memberList.forEach((element)=>{
-            if(!element.picKey){
-              this.$set(element,'portrait',"../../../static/img/testimg.jpg")
-            }else{
-              this.$fly.get(`http://47.107.116.71/files/download/${element.picKey}`).then((res)=>{
-              this.$set(element,'portrait',res.data.data)
-            })
+      this.userOpenD.forEach((item) => {
+        if (item.id == this.OpenId) {
+          this.memberList = item.member
+          this.memberList.forEach((element) => {
+            if (!element.picKey) {
+              this.$set(element, 'portrait', "../../../static/img/testimg.jpg")
+            } else {
+              this.$fly.get(`http://47.107.116.71/files/download/${element.picKey}`).then((res) => {
+                this.$set(element, 'portrait', res.data.data)
+              })
             }
           })
-          this.count=item.member.length
-          this.title=item.title
-          this.portrait=item.portrait
+          this.count = item.member.length
+          this.title = item.title
+          this.portrait = item.portrait
         }
       })
       this.getRecordList()
@@ -91,11 +98,16 @@ import AddRecordM from '../../components/AddRecordM'
     methods: {
       getRecordList() {
         this.$fly.get(`http://47.107.116.71/open_days/record/${this.OpenId}`).then((res) => {
-          res.data.data.forEach((item)=>{
-            this.$set(item,'startTime',this.timeFormat(item.startTime))
-            this.$set(item,'endTime',this.timeFormat(item.endTime))
+          res.data.data.forEach((item) => {
+            this.$set(item, 'startTime', this.timeFormat(item.startTime).replace(/-/g, '/'))
+            this.$set(item, 'endTime', this.timeFormat(item.endTime).replace(/-/g, '/'))
+            let endTime = new Date(item.endTime)
+            let nowTime = new Date()
+            if (nowTime > endTime) {
+              this.$set(item, 'isPass', true)
+            }
           })
-          this.recordList=res.data.data
+          this.recordList = res.data.data
         })
       },
       timeFormat(value) {
@@ -108,21 +120,36 @@ import AddRecordM from '../../components/AddRecordM'
         let s = date.getSeconds();
         return Y + M + D + h + m + s;
       },
-      ScloseModal(){
-        this.SmdShow=false
+      ScloseModal() {
+        this.SmdShow = false
       },
-      RcloseModal(){
-        this.RmdShow=false
+      RcloseModal() {
+        this.RmdShow = false
       },
-      reloadMember(){
-        this.$fly.get(`http://47.107.116.71/open_days/user/${this.OpenId}`).then((res)=>{
-          this.memberList=res.data.data
+      reloadMember() {
+        this.$fly.get(`http://47.107.116.71/open_days/user/${this.OpenId}`).then((res) => {
+          this.memberList = res.data.data
+          this.memberList.forEach((element) => {
+            if (!element.picKey) {
+              this.$set(element, 'portrait', "../../../static/img/testimg.jpg")
+            } else {
+              this.$fly.get(`http://47.107.116.71/files/download/${element.picKey}`).then((res) => {
+                this.$set(element, 'portrait', res.data.data)
+                this.count = this.memberList.member.length
+              })
+            }
+          })
         })
+      },
+      go(src, id) {
+        wx.navigateTo({
+          url: `/pages${src}/main?id=${id}`
+        });
       }
     },
     computed: {
       ...mapState({
-        userOpenD:state=>state.userOpenD,
+        userOpenD: state => state.userOpenD,
         userInfo: state => state.userInfo
       })
     }
@@ -182,7 +209,7 @@ import AddRecordM from '../../components/AddRecordM'
   }
 
   .title-left {
-    width: 20%;
+    width: 200rpx;
     color: gray;
     font-size: 30rpx;
     margin-left: 10rpx;
@@ -244,6 +271,12 @@ import AddRecordM from '../../components/AddRecordM'
     font-size: 30rpx;
     color: gray;
     text-align: center;
+  }
+
+  .member-userName>div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .seperate {
@@ -312,20 +345,32 @@ import AddRecordM from '../../components/AddRecordM'
   .time {
     flex: 1
   }
-  .addbox{
-     width: 100rpx; 
-     height: 100rpx; 
-     background-color: 
-     white; 
-     border: 
-     1px solid #ffab02; border-radius: 100%; 
-     outline: 10px solid #ffab02; 
-     outline-offset: -35px; cursor: pointer;
+
+  .ispass {
+    width: 60rpx;
+    height: 100%;
   }
-  .add-item{
+
+  .ispass>img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .add-item {
     display: flex;
-    justify-content:center;
+    justify-content: center;
     height: 100rpx;
+  }
+
+  .addbox {
+    width: 100rpx;
+    height: 100%;
+  }
+
+  .addbox>img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
   }
 
 </style>

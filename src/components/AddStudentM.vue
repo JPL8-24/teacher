@@ -43,7 +43,7 @@
             duration: 1500,
             complete: () => {
               this.closeModal()
-              this.$emit("reloadMember")
+              this.$emit( "reloadMember")
             }
           })
         })
